@@ -39,8 +39,8 @@ export default function SendPage() {
           Select a flower that speaks to you and start composing a message
         </p>
       </div>
-      
-      <div className="sticky top-[65px] z-10 py-4 mb-8">
+
+      <div className="sticky top-[65px] z-10 py-4 mb-8 bg-background/95 backdrop-blur-sm">
           <div className="max-w-md md:max-w-lg mx-auto">
               <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

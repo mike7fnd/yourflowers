@@ -12,7 +12,9 @@ export function Logo({ className }: { className?: string }) {
       )}
     >
       <Flower2 className="h-6 w-6 transition-transform group-hover:rotate-12" />
-      <span className="font-headline text-2xl font-bold tracking-tight">yourflowers</span>
+      <span className="font-headline text-2xl font-normal tracking-tight">
+        your<span className="italic">flowers</span>
+      </span>
     </Link>
   );
 }

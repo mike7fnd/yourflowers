@@ -65,7 +65,7 @@ export default function GardenPage() {
                 </p>
             </div>
 
-            <div className="sticky top-[65px] z-10 py-4 mb-8 bg-background">
+            <div className="sticky top-[65px] z-10 py-4 mb-8 bg-background/95 backdrop-blur-sm">
                 <div className="max-w-md mx-auto">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -112,7 +112,7 @@ export default function GardenPage() {
                                             data-ai-hint={placeholder.imageHint}
                                             width={400}
                                             height={400}
-                                            className="h-full w-full object-contain drop-shadow-md"
+                                            className="h-full w-full object-contain drop-shadow-md group-hover:brightness-125 transition-all"
                                         />
                                     </div>
                                     <div className="col-span-3 flex flex-col justify-center">

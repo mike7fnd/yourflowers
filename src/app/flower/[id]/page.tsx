@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -15,11 +16,11 @@ export default function FlowerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  
+
   const { data: bouquet, loading, error } = useBouquet(id);
 
   const fromCreate = searchParams.get('from') === 'create';
-  
+
   // Need to use an effect to trigger notFound for static generation compatibility
   useEffect(() => {
     if (!loading && !bouquet) {
@@ -30,7 +31,7 @@ export default function FlowerPage() {
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
-  
+
   if (error || !bouquet) {
     // This will be caught by the useEffect to trigger notFound
     return null;
@@ -43,7 +44,7 @@ export default function FlowerPage() {
   }
 
   const isFuture = bouquet.deliveryType === 'timed' && bouquet.deliveryDate && bouquet.deliveryDate > new Date();
-  
+
   return (
     <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {bouquet.recipientName && (
@@ -75,6 +76,7 @@ export default function FlowerPage() {
                             height={400}
                             className="h-full w-full object-contain"
                             priority
+                            unoptimized={true}
                         />
                     </div>
                 </CardContent>

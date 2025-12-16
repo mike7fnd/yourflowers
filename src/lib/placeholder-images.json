@@ -1,0 +1,58 @@
+{
+  "placeholderImages": [
+    {
+      "id": "rose",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/MkzSVyYP/Gemini-Generated-Image-9hzt89hzt89hzt89-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "tulip",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/SXQnFVXf/Gemini-Generated-Image-q4sls3q4sls3q4sl-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "lily",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/S4dNv5y3/Gemini-Generated-Image-wbvp13wbvp13wbvp-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "daisy",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/spxTQT5B/Gemini-Generated-Image-qtpzsfqtpzsfqtpz-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "sunflower",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/bM3tprV8/Gemini-Generated-Image-insk6qinsk6qinsk-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "orchid",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/fVCVYx5n/Gemini-Generated-Image-43k5yy43k5yy43k5-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "carnation",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/LdVxg4XV/Gemini-Generated-Image-t58ezft58ezft58e-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "peony",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/n8c33TXV/Gemini-Generated-Image-mf7iskmf7iskmf7i-removebg-preview.png",
+      "imageHint": "digital flower"
+    },
+    {
+      "id": "lavender",
+      "description": "A beautiful digital flower.",
+      "imageUrl": "https://i.ibb.co/NvGNCJz/Gemini-Generated-Image-l0x365l0x365l0x3-removebg-preview.png",
+      "imageHint": "digital flower"
+    }
+  ]
+}

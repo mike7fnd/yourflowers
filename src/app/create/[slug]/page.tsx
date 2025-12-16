@@ -39,6 +39,7 @@ export default function CreatePage({ params }: { params: { slug: string } }) {
                         width={600}
                         height={400}
                         className="h-full w-full object-contain"
+                        unoptimized
                     />
                 </CardContent>
              </Card>

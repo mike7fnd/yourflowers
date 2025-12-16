@@ -40,7 +40,7 @@ export default function GardenPage() {
             }
 
             const lowercasedTerm = searchTerm.toLowerCase();
-            const filtered = allBouquets.filter(bouquet => 
+            const filtered = allBouquets.filter(bouquet =>
                 (bouquet.message && bouquet.message.toLowerCase().includes(lowercasedTerm)) ||
                 (bouquet.recipientName && bouquet.recipientName.toLowerCase().includes(lowercasedTerm))
             );
@@ -101,7 +101,7 @@ export default function GardenPage() {
                     {filteredBouquets && filteredBouquets.map((bouquet) => {
                         const placeholder = PlaceHolderImages.find(p => p.id === bouquet.flower.image);
                         if (!placeholder) return null;
-                        
+
                         return (
                             <Link key={bouquet.id} href={`/flower/${bouquet.id}`} className="block group">
                                 <Card className="border shadow-sm grid grid-cols-5 items-center p-4 sm:p-6 gap-0 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
@@ -113,6 +113,7 @@ export default function GardenPage() {
                                             width={400}
                                             height={400}
                                             className="h-full w-full object-contain drop-shadow-md group-hover:brightness-125 transition-all"
+                                            unoptimized
                                         />
                                     </div>
                                     <div className="col-span-3 flex flex-col justify-center">
@@ -124,7 +125,7 @@ export default function GardenPage() {
                                         ) : (
                                             <p className="text-muted-foreground italic mt-2">A quiet offering, no words needed.</p>
                                         )}
-                                        
+
                                         <p className="text-xs text-muted-foreground mt-4">
                                             <ClientOnly>
                                                 {new Date(bouquet.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}

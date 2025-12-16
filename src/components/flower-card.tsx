@@ -21,6 +21,7 @@ export default function FlowerCard({ flower }: FlowerCardProps) {
             width={800}
             height={600}
             className="h-full w-full object-contain transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:-rotate-2 group-hover:[filter:drop-shadow(0_0_15px_hsl(var(--primary)/0.6))_brightness(1.25)]"
+            unoptimized
           />
         </div>
         <div className="space-y-2 flex flex-col items-center">

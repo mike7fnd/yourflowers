@@ -40,11 +40,11 @@ export const addBouquet = async (
   };
 
   const docRef = await addDoc(bouquetsCollection, bouquetPayload);
-  
+
   if (!docRef) {
       throw new Error("Could not create bouquet.");
   }
-  
+
   return docRef.id;
 };
 
@@ -80,7 +80,8 @@ export const getPublicBouquets = async (
   const q = query(
     bouquetsCollection,
     where('deliveryType', '==', 'public'),
-    // orderBy('createdAt', 'desc'), // This line is causing the index error
+    // The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/studio-3926687012-97350/firestore/indexes?create_composite=Clhwcm9qZWN0cy9zdHVkaW8tMzkyNjY4NzAxMi05NzM1MC9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvYm91cXVldHMvaW5kZXhlcy9fEAEaEAoMZGVsaXZlcnlUeXBlEAEaDQoJY3JlYXRlZEF0EAIaDAoIX19uYW1lX18QAg
+    // orderBy('createdAt', 'desc'),
     ...(options?.startAfter ? [firestoreStartAfter(options.startAfter)] : []),
     ...(options?.count ? [limit(options.count)] : [])
   );
@@ -96,6 +97,9 @@ export const getPublicBouquets = async (
   });
 
   const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+  // Sort on the client as a temporary fix for the missing index
+  bouquets.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return { bouquets, lastDoc };
 };

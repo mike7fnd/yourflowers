@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -40,7 +41,7 @@ export default function GardenPage() {
             }
 
             const lowercasedTerm = searchTerm.toLowerCase();
-            const filtered = allBouquets.filter(bouquet =>
+            const filtered = allBouquets.filter(bouquet => 
                 (bouquet.message && bouquet.message.toLowerCase().includes(lowercasedTerm)) ||
                 (bouquet.recipientName && bouquet.recipientName.toLowerCase().includes(lowercasedTerm))
             );
@@ -65,7 +66,7 @@ export default function GardenPage() {
                 </p>
             </div>
 
-            <div className="sticky top-[65px] z-10 py-4 mb-8 bg-background/95 backdrop-blur-sm">
+            <div className="sticky top-[65px] z-10 py-4 mb-8">
                 <div className="max-w-md mx-auto">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -81,7 +82,8 @@ export default function GardenPage() {
             </div>
 
             {loading ? (
-                <div className="max-w-4xl mx-auto space-y-12">
+                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                    <BouquetSkeleton />
                     <BouquetSkeleton />
                     <BouquetSkeleton />
                     <BouquetSkeleton />
@@ -97,14 +99,15 @@ export default function GardenPage() {
                     <p>Try searching for something else.</p>
                 </div>
             ) : (
-                <div className="max-w-4xl mx-auto space-y-12">
+                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                     {filteredBouquets && filteredBouquets.map((bouquet) => {
+                        if (!bouquet.flower) return null; // Defensive check
                         const placeholder = PlaceHolderImages.find(p => p.id === bouquet.flower.image);
                         if (!placeholder) return null;
-
+                        
                         return (
                             <Link key={bouquet.id} href={`/flower/${bouquet.id}`} className="block group">
-                                <Card className="border shadow-sm grid grid-cols-5 items-center p-4 sm:p-6 gap-0 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                                <Card className="border shadow-sm grid grid-cols-5 items-center p-4 sm:p-6 gap-0 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 h-full">
                                     <div className="col-span-2 -ml-8 -my-8 sm:-ml-12 sm:-my-12">
                                         <Image
                                             src={placeholder.imageUrl}
@@ -112,20 +115,20 @@ export default function GardenPage() {
                                             data-ai-hint={placeholder.imageHint}
                                             width={400}
                                             height={400}
-                                            className="h-full w-full object-contain drop-shadow-md group-hover:brightness-125 transition-all"
-                                            unoptimized
+                                            className="h-full w-full object-contain drop-shadow-md group-hover:brightness-110 transition-all duration-300"
+                                            unoptimized={true}
                                         />
                                     </div>
                                     <div className="col-span-3 flex flex-col justify-center">
                                         {bouquet.recipientName && <p className="text-sm text-muted-foreground">For {bouquet.recipientName}</p>}
                                         {bouquet.message ? (
-                                            <blockquote className="text-lg text-foreground/90 italic mt-2 border-l-4 pl-4 line-clamp-2">
+                                            <blockquote className="text-lg text-foreground/90 italic mt-2 border-l-4 pl-4 line-clamp-3">
                                                 {bouquet.message}
                                             </blockquote>
                                         ) : (
                                             <p className="text-muted-foreground italic mt-2">A quiet offering, no words needed.</p>
                                         )}
-
+                                        
                                         <p className="text-xs text-muted-foreground mt-4">
                                             <ClientOnly>
                                                 {new Date(bouquet.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}

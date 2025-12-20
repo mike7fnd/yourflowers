@@ -24,12 +24,18 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { addBouquet } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
+import { containsProfanity } from '@/lib/profanity';
+import { addBouquet } from '@/lib/db';
+import { useAuth, useFirestore, useUser } from '@/firebase';
+import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 
 const formSchema = z.object({
   recipientName: z.string().optional(),
-  message: z.string().min(1, { message: 'A message is required.' }).max(280),
+  message: z.string().min(1, { message: 'A message is required.' })
+    .refine(value => !containsProfanity(value), {
+      message: 'Your message contains inappropriate language. Please revise it.',
+    }),
   deliveryType: z.enum(['private', 'public', 'timed'], {
     required_error: 'Please select a delivery type.',
   }),
@@ -42,6 +48,10 @@ export default function CreateBouquetForm({ flower }: { flower: Flower }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const firestore = useFirestore();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -56,28 +66,50 @@ export default function CreateBouquetForm({ flower }: { flower: Flower }) {
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
+
     try {
-      const newBouquet = addBouquet({ ...values, flower });
+      if (!user) {
+        // Silently sign in the user if they are not authenticated.
+        initiateAnonymousSignIn(auth);
+        // We can't proceed immediately, we need to wait for the user state to update.
+        // A robust solution would involve waiting for the user object to be available.
+        // For now, we'll ask the user to try again.
+        toast({
+          title: "Just a moment...",
+          description: "We're getting things ready. Please try sending your flower again.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
+      const bouquetId = await addBouquet(firestore, {
+        flower,
+        ...values,
+      });
+
       toast({
         title: 'Flower Sent!',
         description: 'Your beautiful gesture has been created.',
       });
-      
-      // Redirect to the newly created flower's page.
-      // Add a query param to show a success message.
-      router.push(`/flower/${newBouquet.id}?from=create`);
 
-    } catch (error) {
-      console.error('Failed to create bouquet:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Oh no!',
-        description: 'Something went wrong while sending your flower.',
-      });
-      setIsSubmitting(false);
+      if (values.deliveryType === 'public') {
+        router.push('/garden');
+      } else {
+        router.push(`/flower/${bouquetId}?from=create`);
+      }
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: error.message || "Could not send the flower. Please try again.",
+        });
+        console.error("Form submission failed:", error);
+    } finally {
+        setIsSubmitting(false);
     }
   }
+  
+  const isButtonDisabled = isSubmitting || isUserLoading;
 
   return (
     <Form {...form}>
@@ -111,7 +143,7 @@ export default function CreateBouquetForm({ flower }: { flower: Flower }) {
                 />
               </FormControl>
                <FormDescription>
-                Short and emotionally resonant.
+                Your kind words will be shared.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -194,9 +226,9 @@ export default function CreateBouquetForm({ flower }: { flower: Flower }) {
           />
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button type="submit" disabled={isButtonDisabled} className="w-full">
           {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Send Flower
+          {isUserLoading && !isSubmitting ? 'Connecting...' : 'Send Flower'}
         </Button>
       </form>
     </Form>

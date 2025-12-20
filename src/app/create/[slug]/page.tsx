@@ -1,3 +1,4 @@
+
 import { use } from 'react';
 import { notFound } from 'next/navigation';
 import { flowers } from '@/lib/flowers';
@@ -39,7 +40,7 @@ export default function CreatePage({ params }: { params: { slug: string } }) {
                         width={600}
                         height={400}
                         className="h-full w-full object-contain"
-                        unoptimized
+                        unoptimized={true}
                     />
                 </CardContent>
              </Card>

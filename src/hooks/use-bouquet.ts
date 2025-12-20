@@ -1,32 +1,40 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useFirestore } from '@/firebase';
+import { getBouquet } from '@/lib/db';
 import type { Bouquet } from '@/lib/types';
-import { findBouquet } from '@/lib/db';
 
-export function useBouquet(id: string | undefined) {
-  const [bouquet, setBouquet] = useState<Bouquet | null | undefined>(undefined);
+function useBouquet(id: string | undefined | null) {
+  const firestore = useFirestore();
+  const [bouquet, setBouquet] = useState<Bouquet | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    setBouquet(undefined); // Loading state
-    if (id) {
-        const foundBouquet = findBouquet(id);
-        setBouquet(foundBouquet);
-    } else {
-        setBouquet(null); // Not found
+    if (!id || !firestore) {
+      setLoading(false);
+      return;
     }
-  }, [id]);
 
-  // Simulate async loading to match Firebase hook behavior
-  useEffect(() => {
-      const timer = setTimeout(() => {
-          if (bouquet === undefined) {
-              setBouquet(id ? findBouquet(id) : null);
-          }
-      }, 50); // small delay
-      return () => clearTimeout(timer);
-  }, [id, bouquet]);
+    const fetchBouquet = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getBouquet(firestore, id);
+        setBouquet(data);
+      } catch (err: any) {
+        console.error("Error fetching bouquet:", err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchBouquet();
+  }, [id, firestore]);
 
-  return { data: bouquet, loading: bouquet === undefined, error: null };
+  return { data: bouquet, loading, error };
 }
+
+export { useBouquet };

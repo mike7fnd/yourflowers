@@ -1,9 +1,23 @@
 'use client';
+
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  Timestamp,
+  Firestore,
+} from 'firebase/firestore';
 import type { Bouquet, Flower } from './types';
+import { addDocumentNonBlocking } from '@/firebase';
 
-const BOUQUETS_KEY = 'bouquets';
-
-type CreateBouquetData = {
+type BouquetData = {
   flower: Flower;
   recipientName?: string;
   message: string;
@@ -11,64 +25,77 @@ type CreateBouquetData = {
   deliveryDate?: Date;
 };
 
-// Helper to get all bouquets from local storage
-const getBouquets = (): Bouquet[] => {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  try {
-    const bouquetsJson = localStorage.getItem(BOUQUETS_KEY);
-    if (!bouquetsJson) return [];
-    // Parse dates correctly
-    return JSON.parse(bouquetsJson, (key, value) => {
-      if (key === 'createdAt' || key === 'deliveryDate') {
-        return new Date(value);
-      }
-      return value;
-    });
-  } catch (error) {
-    console.error('Failed to parse bouquets from localStorage:', error);
-    return [];
-  }
-};
+export const addBouquet = async (
+  db: Firestore,
+  data: BouquetData
+) => {
+  const bouquetsCollection = collection(db, 'bouquets');
 
-// Helper to save all bouquets to local storage
-const saveBouquets = (bouquets: Bouquet[]) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(BOUQUETS_KEY, JSON.stringify(bouquets));
-};
-
-/**
- * Adds a new bouquet to local storage.
- */
-export const addBouquet = (data: CreateBouquetData): Bouquet => {
-  const allBouquets = getBouquets();
-  const newBouquet: Bouquet = {
-    id: crypto.randomUUID(),
-    createdAt: new Date(),
-    ...data,
+  const bouquetPayload: Omit<Bouquet, 'id' | 'createdAt' | 'deliveryDate'> & { createdAt: any, deliveryDate?: any } = {
+    flower: data.flower,
+    recipientName: data.recipientName || '',
+    message: data.message,
+    deliveryType: data.deliveryType,
+    createdAt: serverTimestamp(),
   };
 
-  const updatedBouquets = [...allBouquets, newBouquet];
-  saveBouquets(updatedBouquets);
+  if (data.deliveryType === 'timed' && data.deliveryDate) {
+    bouquetPayload.deliveryDate = Timestamp.fromDate(data.deliveryDate);
+  }
+
+  // We use addDocumentNonBlocking to avoid awaiting the promise here
+  const docRefPromise = addDocumentNonBlocking(bouquetsCollection, bouquetPayload);
   
-  return newBouquet;
+  const docRef = await docRefPromise;
+
+  if (!docRef) {
+      throw new Error("Could not create bouquet.");
+  }
+  
+  return docRef.id;
 };
 
-/**
- * Finds a single bouquet by its ID from local storage.
- */
-export const findBouquet = (id: string): Bouquet | null => {
-  const allBouquets = getBouquets();
-  return allBouquets.find((b) => b.id === id) || null;
+export const getBouquet = async (
+  db: Firestore,
+  id: string
+): Promise<Bouquet | null> => {
+  const docRef = doc(db, 'bouquets', id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      ...data,
+      // Convert Firestore Timestamps to JS Dates
+      createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
+      deliveryDate: (data.deliveryDate as Timestamp)?.toDate(),
+    } as Bouquet;
+  } else {
+    return null;
+  }
 };
 
-/**
- * Finds all public bouquets from local storage, sorted by creation date.
- */
-export const findPublicBouquets = (): Bouquet[] => {
-  const allBouquets = getBouquets();
-  return allBouquets
-    .filter((b) => b.deliveryType === 'public')
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+export const getPublicBouquets = async (
+  db: Firestore,
+  options?: { count?: number }
+): Promise<Bouquet[]> => {
+  const bouquetsCollection = collection(db, 'bouquets');
+  const q = query(
+    bouquetsCollection,
+    where('deliveryType', '==', 'public'),
+    // orderBy('createdAt', 'desc'), // Temporarily removed to avoid index error
+    ...(options?.count ? [limit(options.count)] : [])
+  );
+
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
+      deliveryDate: (data.deliveryDate as Timestamp)?.toDate(),
+    } as Bouquet;
+  }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort on the client as a temporary measure
 };

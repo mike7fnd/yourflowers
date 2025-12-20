@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { GalleryHorizontal, Info, Send } from 'lucide-react';
+import { Flower2, Info, Send } from 'lucide-react';
+import { ClientOnly } from './client-only';
 
 const links = [
   { href: '/send', label: 'Send Flower', icon: Send },
-  { href: '/garden', label: 'Browse', icon: GalleryHorizontal },
+  { href: '/garden', label: 'Browse', icon: Flower2 },
   { href: '/about', label: 'About', icon: Info },
 ];
 
@@ -29,8 +30,10 @@ export function Navigation() {
                     'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                     )}
                 >
-                    <link.icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{link.label}</span>
+                  <ClientOnly>
+                    <link.icon className="h-4 w-4 sm:hidden" />
+                  </ClientOnly>
+                  <span className="hidden sm:inline">{link.label}</span>
                 </Link>
             )
         }
@@ -46,7 +49,9 @@ export function Navigation() {
                 : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
             )}
           >
-            <link.icon className="h-4 w-4" />
+            <ClientOnly>
+              <link.icon className="h-4 w-4 sm:hidden" />
+            </ClientOnly>
             <span className="hidden sm:inline">{link.label}</span>
           </Link>
         );

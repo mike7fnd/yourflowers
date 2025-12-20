@@ -1,29 +1,18 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
     match /bouquets/{bouquetId} {
-      // Allow anyone to read bouquets. This is necessary for the public garden
-      // and for sharing private/timed bouquets via a link.
-      allow read: if true;
-
-      // Allow anyone to create a bouquet, but with strict validation.
-      // This rule is checked on the client, but our writes happen via a trusted server action.
-      allow create: if request.resource.data.keys().hasAll(['flowerId', 'deliveryType', 'createdAt'])
-                   && request.resource.data.flowerId is string
-                   && request.resource.data.deliveryType in ['private', 'public', 'timed']
-                   && request.resource.data.createdAt == request.time
-                   && (!('message' in request.resource.data) || (request.resource.data.message is string && request.resource.data.message.size() <= 280))
-                   && (!('recipientName' in request.resource.data) || (request.resource.data.recipientName is string && request.resource.data.recipientName.size() <= 100))
-                   && (!('deliveryDate' in request.resource.data) || request.resource.data.deliveryDate is timestamp);
+      // Allow anyone to read any bouquet (for public garden and direct links)
+      allow get: if true;
       
-      // Disallow updates and deletes for now to prevent modification after creation.
+      // Allow anyone to query the bouquets collection (for public garden)
+      allow list: if true;
+      
+      // Only allow authenticated users to create new bouquets
+      allow create: if request.auth != null;
+      
+      // Disallow updates and deletes for now
       allow update, delete: if false;
-    }
-
-    // By default, deny all other reads and writes to prevent unauthorized access.
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }

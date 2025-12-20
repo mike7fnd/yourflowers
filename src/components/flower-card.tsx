@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { Flower } from '@/lib/types';
@@ -20,8 +21,8 @@ export default function FlowerCard({ flower }: FlowerCardProps) {
             data-ai-hint={placeholder.imageHint}
             width={800}
             height={600}
-            className="h-full w-full object-contain transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:-rotate-2 group-hover:[filter:drop-shadow(0_0_15px_hsl(var(--primary)/0.6))_brightness(1.25)]"
-            unoptimized
+            className="h-full w-full object-contain transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:-rotate-2 group-hover:[filter:drop-shadow(0_0_15px_hsl(var(--primary)/0.6))_brightness(1.1)]"
+            unoptimized={true}
           />
         </div>
         <div className="space-y-2 flex flex-col items-center">

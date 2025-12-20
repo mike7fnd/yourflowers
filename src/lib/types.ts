@@ -15,13 +15,3 @@ export type Bouquet = {
   deliveryDate?: Date;
   createdAt: Date;
 };
-
-export type BouquetDocument = {
-    id: string;
-    flowerId: string;
-    recipientName?: string;
-    message?: string;
-    deliveryType: 'private' | 'public' | 'timed';
-    deliveryDate?: Date;
-    createdAt: Date;
-}

@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useEffect } from 'react';
 import { notFound, useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Loader2 } from 'lucide-react';
 import { FlowerViewActions } from '@/components/flower-view-actions';
@@ -16,35 +15,32 @@ export default function FlowerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-
+  
   const { data: bouquet, loading, error } = useBouquet(id);
 
   const fromCreate = searchParams.get('from') === 'create';
-
-  // Need to use an effect to trigger notFound for static generation compatibility
+  
   useEffect(() => {
-    if (!loading && !bouquet) {
+    if (!loading && !bouquet && id) {
       notFound();
     }
-  }, [loading, bouquet]);
+  }, [loading, bouquet, id]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
-
+  
   if (error || !bouquet) {
-    // This will be caught by the useEffect to trigger notFound
-    return null;
+    return <div className="text-center py-16 text-muted-foreground">Flower not found.</div>
   }
 
   const placeholder = PlaceHolderImages.find((p) => p.id === bouquet.flower.image);
   if (!placeholder) {
-      // This is an inconsistent data state, should not happen with proper validation
       notFound();
   }
 
   const isFuture = bouquet.deliveryType === 'timed' && bouquet.deliveryDate && bouquet.deliveryDate > new Date();
-
+  
   return (
     <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {bouquet.recipientName && (
@@ -81,12 +77,12 @@ export default function FlowerPage() {
                     </div>
                 </CardContent>
                 <CardContent className='border-t'>
-                    {isFuture ? (
+                    {isFuture && bouquet.deliveryDate ? (
                         <div className="text-center p-8">
                             <p className="text-muted-foreground">This flower is timed to arrive on</p>
                             <p className="text-2xl font-headline mt-2">
                                 <ClientOnly>
-                                    {bouquet.deliveryDate?.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    {bouquet.deliveryDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                                 </ClientOnly>
                             </p>
                         </div>
@@ -95,6 +91,20 @@ export default function FlowerPage() {
                             <blockquote className="text-xl italic text-foreground/80 leading-relaxed">
                                 &ldquo;{bouquet.message}&rdquo;
                             </blockquote>
+                             <div className="pt-4 text-right">
+                                <p className="text-sm text-muted-foreground">Sent on</p>
+                                <p className="text-sm text-muted-foreground">
+                                    <ClientOnly>
+                                        {bouquet.createdAt.toLocaleString(undefined, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                        })}
+                                    </ClientOnly>
+                                </p>
+                            </div>
                         </div>
                     )}
                 </CardContent>

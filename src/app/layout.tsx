@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import { FirebaseClientProvider } from '@/firebase';
+import BottomNav from '@/components/layout/bottom-nav';
 
 export const metadata: Metadata = {
   title: 'yourflowers',
@@ -28,7 +29,8 @@ export default function RootLayout({
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
         <FirebaseClientProvider>
           <Header />
-          <main className="flex-grow">{children}</main>
+          <main className="flex-grow pt-0 sm:pt-16 pb-16 sm:pb-0">{children}</main>
+          <BottomNav />
           <Toaster />
         </FirebaseClientProvider>
       </body>

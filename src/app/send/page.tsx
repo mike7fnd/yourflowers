@@ -41,14 +41,14 @@ export default function SendPage() {
         </p>
       </div>
       
-      <div className="sticky top-[65px] z-10 py-4 mb-8">
+      <div className="sticky top-0 sm:top-[65px] z-10 py-4 mb-8">
           <div className="max-w-md md:max-w-lg mx-auto">
               <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                       type="search"
                       placeholder="Search by flower or meaning..."
-                      className="w-full pl-10"
+                      className="w-full pl-10 shadow-lg"
                       value={searchTerm}
                       onChange={handleSearch}
                   />

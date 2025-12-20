@@ -18,8 +18,8 @@ export default function Home() {
       <section className="w-full py-20 md:py-32 lg:py-40 bg-card border-b">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-headline tracking-tight text-foreground sm:text-5xl lg:text-7xl">
-              A Quiet Place for Connection
+            <h1 className="text-5xl font-headline tracking-tight text-foreground sm:text-6xl lg:text-8xl">
+              your<span className="italic text-primary">flowers</span>
             </h1>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
               In a world of noise, send a silent message. yourflowers is a space to share simple, beautiful gestures with the people you care about.

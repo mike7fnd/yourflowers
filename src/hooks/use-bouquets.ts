@@ -1,9 +1,11 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFirestore } from '@/firebase';
 import { getPublicBouquets } from '@/lib/db';
 import type { Bouquet } from '@/lib/types';
+import type { DocumentSnapshot } from 'firebase/firestore';
 
 type UseBouquetsOptions = {
   limit?: number;
@@ -11,29 +13,58 @@ type UseBouquetsOptions = {
 
 export function usePublicBouquets(options?: UseBouquetsOptions) {
   const firestore = useFirestore();
-  const [bouquets, setBouquets] = useState<Bouquet[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [bouquets, setBouquets] = useState<Bouquet[]>([]);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
+  const limit = options?.limit || 10;
 
-  useEffect(() => {
-    if (!firestore) return;
+  const fetchBouquets = useCallback(async (isInitial: boolean) => {
+    if (!firestore) {
+      if (isInitial) setLoadingInitial(false);
+      return;
+    }
 
-    const fetchBouquets = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getPublicBouquets(firestore, { count: options?.limit });
-        setBouquets(data);
-      } catch (err: any) {
-        console.error("Error fetching public bouquets:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
+    if (isInitial) {
+      setLoadingInitial(true);
+    } else {
+      if (loadingMore || !hasMore) return;
+      setLoadingMore(true);
+    }
+
+    try {
+      const { bouquets: newBouquets, lastDoc } = await getPublicBouquets(firestore, {
+        count: limit,
+        startAfter: isInitial ? null : lastVisible,
+      });
+
+      setBouquets(prev => isInitial ? newBouquets : [...prev, ...newBouquets]);
+      setLastVisible(lastDoc);
+      setHasMore(newBouquets.length === limit);
+
+    } catch (err: any) {
+      console.error("Error fetching public bouquets:", err);
+      // In a real app, you might want to set an error state here
+    } finally {
+      if (isInitial) {
+        setLoadingInitial(false);
+      } else {
+        setLoadingMore(false);
       }
-    };
-    
-    fetchBouquets();
-  }, [firestore, options?.limit]);
+    }
+  }, [firestore, limit, lastVisible, loadingMore, hasMore]);
+  
+  useEffect(() => {
+    if (firestore) {
+      fetchBouquets(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firestore]); // Note: fetchBouquets is not a dependency to avoid re-fetching on every state change it causes.
 
-  return { data: bouquets, loading, error };
+  const loadMoreBouquets = () => {
+    fetchBouquets(false);
+  }
+
+  return { bouquets, loadingInitial, loadingMore, hasMore, loadMoreBouquets };
 }

@@ -11,7 +11,6 @@ export type Bouquet = {
   flower: Flower;
   recipientName?: string;
   message?: string;
-  deliveryType: 'private' | 'public' | 'timed';
-  deliveryDate?: Date;
+  deliveryType: 'public' | 'private';
   createdAt: Date;
 };

@@ -38,8 +38,6 @@ export default function FlowerPage() {
   if (!placeholder) {
       notFound();
   }
-
-  const isFuture = bouquet.deliveryType === 'timed' && bouquet.deliveryDate && bouquet.deliveryDate > new Date();
   
   return (
     <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -56,7 +54,7 @@ export default function FlowerPage() {
                     <Info className="h-4 w-4 !text-primary" />
                     <AlertTitle className="text-primary">Your Flower is Ready</AlertTitle>
                     <AlertDescription>
-                        Your private flower has been created. Share the link below with someone special.
+                        {bouquet.deliveryType === 'private' ? 'Your private flower has been created. Share the link below with someone special.' : 'Your flower has been added to the public garden. You can see it in the garden.'}
                     </AlertDescription>
                 </Alert>
             )}
@@ -77,40 +75,29 @@ export default function FlowerPage() {
                     </div>
                 </CardContent>
                 <CardContent className='border-t'>
-                    {isFuture && bouquet.deliveryDate ? (
-                        <div className="text-center p-8">
-                            <p className="text-muted-foreground">This flower is timed to arrive on</p>
-                            <p className="text-2xl font-headline mt-2">
+                    <div className="text-left p-6 sm:p-8 space-y-4">
+                        <blockquote className="text-xl italic text-foreground/80 leading-relaxed">
+                            &ldquo;{bouquet.message}&rdquo;
+                        </blockquote>
+                         <div className="pt-4 text-right">
+                            <p className="text-sm text-muted-foreground">Sent on</p>
+                            <p className="text-sm text-muted-foreground">
                                 <ClientOnly>
-                                    {bouquet.deliveryDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    {bouquet.createdAt.toLocaleString(undefined, {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                    })}
                                 </ClientOnly>
                             </p>
                         </div>
-                    ) : (
-                        <div className="text-left p-6 sm:p-8 space-y-4">
-                            <blockquote className="text-xl italic text-foreground/80 leading-relaxed">
-                                &ldquo;{bouquet.message}&rdquo;
-                            </blockquote>
-                             <div className="pt-4 text-right">
-                                <p className="text-sm text-muted-foreground">Sent on</p>
-                                <p className="text-sm text-muted-foreground">
-                                    <ClientOnly>
-                                        {bouquet.createdAt.toLocaleString(undefined, {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                        })}
-                                    </ClientOnly>
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    </div>
                 </CardContent>
             </Card>
 
-            <FlowerViewActions bouquet={bouquet} />
+            {fromCreate && <FlowerViewActions bouquet={bouquet} />}
         </div>
     </div>
   );

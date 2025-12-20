@@ -13,25 +13,25 @@ import {
   getDocs,
   Timestamp,
   Firestore,
+  startAfter as firestoreStartAfter,
+  DocumentSnapshot,
 } from 'firebase/firestore';
 import type { Bouquet, Flower } from './types';
-import { addDocumentNonBlocking } from '@/firebase';
 
 type BouquetData = {
   flower: Flower;
   recipientName?: string;
   message: string;
-  deliveryType: 'private' | 'public' | 'timed';
-  deliveryDate?: Date;
+  deliveryType: 'public' | 'private';
 };
 
 export const addBouquet = async (
   db: Firestore,
   data: BouquetData
-) => {
+): Promise<string> => {
   const bouquetsCollection = collection(db, 'bouquets');
 
-  const bouquetPayload: Omit<Bouquet, 'id' | 'createdAt' | 'deliveryDate'> & { createdAt: any, deliveryDate?: any } = {
+  const bouquetPayload: Omit<Bouquet, 'id' | 'createdAt'> & { createdAt: any } = {
     flower: data.flower,
     recipientName: data.recipientName || '',
     message: data.message,
@@ -39,15 +39,8 @@ export const addBouquet = async (
     createdAt: serverTimestamp(),
   };
 
-  if (data.deliveryType === 'timed' && data.deliveryDate) {
-    bouquetPayload.deliveryDate = Timestamp.fromDate(data.deliveryDate);
-  }
-
-  // We use addDocumentNonBlocking to avoid awaiting the promise here
-  const docRefPromise = addDocumentNonBlocking(bouquetsCollection, bouquetPayload);
+  const docRef = await addDoc(bouquetsCollection, bouquetPayload);
   
-  const docRef = await docRefPromise;
-
   if (!docRef) {
       throw new Error("Could not create bouquet.");
   }
@@ -67,35 +60,42 @@ export const getBouquet = async (
     return {
       id: docSnap.id,
       ...data,
-      // Convert Firestore Timestamps to JS Dates
       createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
-      deliveryDate: (data.deliveryDate as Timestamp)?.toDate(),
     } as Bouquet;
   } else {
     return null;
   }
 };
 
+type PaginatedBouquetsResult = {
+  bouquets: Bouquet[];
+  lastDoc: DocumentSnapshot | null;
+};
+
 export const getPublicBouquets = async (
   db: Firestore,
-  options?: { count?: number }
-): Promise<Bouquet[]> => {
+  options?: { count?: number; startAfter?: DocumentSnapshot | null }
+): Promise<PaginatedBouquetsResult> => {
   const bouquetsCollection = collection(db, 'bouquets');
   const q = query(
     bouquetsCollection,
     where('deliveryType', '==', 'public'),
-    // orderBy('createdAt', 'desc'), // Temporarily removed to avoid index error
+    // orderBy('createdAt', 'desc'), // This line is causing the index error
+    ...(options?.startAfter ? [firestoreStartAfter(options.startAfter)] : []),
     ...(options?.count ? [limit(options.count)] : [])
   );
 
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
+  const bouquets = querySnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       id: doc.id,
       ...data,
       createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
-      deliveryDate: (data.deliveryDate as Timestamp)?.toDate(),
     } as Bouquet;
-  }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort on the client as a temporary measure
+  });
+
+  const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+  return { bouquets, lastDoc };
 };

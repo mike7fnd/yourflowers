@@ -1,4 +1,5 @@
 
+
 import { use } from 'react';
 import { notFound } from 'next/navigation';
 import { flowers } from '@/lib/flowers';
@@ -26,7 +27,7 @@ export default function CreatePage({ params }: { params: { slug: string } }) {
             Compose Your Message
           </h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            With the {flower.name} as your anchor, write a few words or let us suggest a sentiment.
+            With the {flower.name} as your anchor, write a few words.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
